@@ -23,7 +23,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { redirect, useRouter } from "next/navigation";
+import { createJob } from "@/lib/actions/jobs";
+
 export default function NewJobPage() {
+  const router = useRouter();
   const [isRemote, setIsRemote] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -205,6 +209,8 @@ export default function NewJobPage() {
     };
 
     try {
+      const response = await createJob(jobData);
+
       /*
        * Connect this to your HireLoop API.
        *
@@ -217,12 +223,10 @@ export default function NewJobPage() {
        *   },
        *   body: JSON.stringify(jobData),
        * });
-       *
-       * if (!response.ok) {
-       *   throw new Error("Failed to create job");
-       * }
+       * // if (!response.ok) {
+        //  throw new Error("Failed to create job");
+        // }
        */
-
       console.log("Job to save:", jobData);
 
       await new Promise((resolve) => setTimeout(resolve, 800));
@@ -243,12 +247,15 @@ export default function NewJobPage() {
         requirements: "",
         benefits: "",
       });
+    router.push("/dashboard/recruiter/jobs");
+
     } catch (error) {
       console.error("Job creation failed:", error);
       alert("Something went wrong while posting the job.");
     } finally {
       setIsSubmitting(false);
     }
+    
   };
 
   return (
