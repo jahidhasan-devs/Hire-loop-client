@@ -64,10 +64,10 @@ const Navbar = () => {
             </Link>
 
             <Link
-              href="/company"
+              href="/companies"
               className="font-medium transition hover:text-blue-600"
             >
-              Company
+              Companies
             </Link>
 
             <Link

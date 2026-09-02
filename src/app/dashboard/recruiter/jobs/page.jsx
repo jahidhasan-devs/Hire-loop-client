@@ -1,11 +1,14 @@
 import { getCompanyJobs } from "@/lib/api/jobs";
 import React from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
+import { getLoggedInRecruiterCompany } from "@/lib/api/companies";
 
 const RecruiterJobs = async () => {
-  const companyId = "company_001"; // TODO: get from logged-in recruiter
 
-  const jobs = await getCompanyJobs(companyId);
+  const company = await getLoggedInRecruiterCompany();
+  console.log(company);
+
+  const jobs = await getCompanyJobs(company._id);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] p-4 md:p-6">
