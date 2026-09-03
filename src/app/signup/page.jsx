@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Description, Radio, RadioGroup } from "@heroui/react";
 import { Button, InputGroup, Label, TextField } from "@heroui/react";
 
@@ -20,6 +20,9 @@ import { authClient } from "@/lib/auth-client";
 
 export default function SignUpPage() {
   const router = useRouter();
+
+  const searchparams=useSearchParams();
+  const redirectTo=searchparams.get("redirect")||"/";
 
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -51,7 +54,7 @@ export default function SignUpPage() {
         name,
         role,
         image: imageUrl || undefined,
-        callbackURL: "/",
+       
       });
 
       if (res?.error) {
@@ -63,7 +66,7 @@ export default function SignUpPage() {
 
       setSuccessMsg("Account created successfully! Redirecting...");
 
-      router.push("/");
+      router.push(redirectTo);
     } catch (err) {
       setErrorMsg(err?.message || "An unexpected error occurred.");
     } finally {
@@ -199,18 +202,18 @@ export default function SignUpPage() {
           {/* Role selection */}
           <div className="flex flex-col gap-4">
             <Label>Subscription plan</Label>
-            <RadioGroup  
-              defaultValue="seeker"                   
+            <RadioGroup
+              defaultValue="seeker"
               name="role"
               orientation="horizontal"
-              onChange={(value)=>setRole(value)}
+              onChange={(value) => setRole(value)}
             >
               <Radio value="seeker">
                 <Radio.Content>
                   <Radio.Control>
                     <Radio.Indicator />
                   </Radio.Control>
-                 Job Seeker
+                  Job Seeker
                 </Radio.Content>
                 <Description>For job search</Description>
               </Radio>
@@ -219,11 +222,10 @@ export default function SignUpPage() {
                   <Radio.Control>
                     <Radio.Indicator />
                   </Radio.Control>
-                 Recruiter
+                  Recruiter
                 </Radio.Content>
                 <Description>Recruiter</Description>
               </Radio>
-             
             </RadioGroup>
           </div>
 
@@ -243,7 +245,7 @@ export default function SignUpPage() {
           <span className="text-default-500">Already have an account? </span>
 
           <Link
-            href="/signin"
+            href={`/signin?redirect=${redirectTo}`}
             className="font-semibold text-primary hover:underline"
           >
             Sign In

@@ -14,10 +14,15 @@ import {
 } from "@gravity-ui/icons";
 
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
   const router = useRouter();
+
+ const searchParams=useSearchParams();
+ const redirectTo=searchParams.get('redirect')|| "/";
+ console.log("Redirect to",redirectTo)
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -42,7 +47,7 @@ export default function SignInPage() {
       const res = await authClient.signIn.email({
         email,
         password,
-        callbackURL: "/",
+        
       });
 
       if (res?.error) {
@@ -51,9 +56,10 @@ export default function SignInPage() {
       }
 
       setSuccessMsg("Login successful! Redirecting...");
-
-      router.push("/");
-    } catch (err) {
+       router.push(redirectTo);
+   
+    } 
+    catch (err) {
       setErrorMsg(err?.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
@@ -164,7 +170,7 @@ export default function SignInPage() {
           <span className="text-default-500">New to Hire Loop? </span>
 
           <Link
-            href="/signup"
+            href={`/signup?redirect=${redirectTo}`}
             className="font-semibold text-primary hover:underline"
           >
             Create an account
