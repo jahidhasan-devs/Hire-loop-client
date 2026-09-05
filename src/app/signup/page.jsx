@@ -47,12 +47,15 @@ export default function SignUpPage() {
     setSuccessMsg(null);
     setLoading(true);
 
+      const plan=role==='seeker'?'seeker_free':'recruiter_free';
+
     try {
       const res = await authClient.signUp.email({
         email,
         password,
         name,
         role,
+        plan,
         image: imageUrl || undefined,
        
       });

@@ -18,6 +18,9 @@ user:{
   additionalFields:{
     role:{
       default:"seeker"
+    },
+    plan:{
+      default:'seeker_free'
     }
   }
 }

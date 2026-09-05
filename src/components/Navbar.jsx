@@ -71,7 +71,7 @@ const Navbar = () => {
             </Link>
 
             <Link
-              href="/pricing"
+              href="/plans"
               className="font-medium transition hover:text-blue-600"
             >
               Pricing
