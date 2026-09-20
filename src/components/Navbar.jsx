@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {  Button, Dropdown, Label } from "@heroui/react";
-import { Avatar } from "@heroui/react";
+import { Button, Dropdown, Label, Avatar } from "@heroui/react";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
@@ -11,16 +10,49 @@ import { authClient } from "@/lib/auth-client";
 const Navbar = () => {
   const { data: session } = authClient.useSession();
   const user = session?.user;
-  // console.log(user?.image)
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // ================= NAV LINKS =================
+  const navLinks = [
+    {
+      name: "Home",
+      href: "/",
+    },
+    {
+      name: "Browse Jobs",
+      href: "/jobs",
+    },
+    {
+      name: "Companies",
+      href: "/companies",
+    },
+    {
+      name: "Pricing",
+      href: "/plans",
+    },
+  ];
+
+  const dashboardLinks={
+    seeker:'/dashboard/seeker',
+    recruiter:'/dashboard/recruiter'
+  } 
+
+  if(user?.email){
+    navLinks.push(
+      {
+        name:'Dashboard',
+        href:dashboardLinks[user?.role || 'seeker']
+      }
+    )
+  }
+
 
   // ================= SIGN OUT =================
   const handleSignOut = async () => {
     try {
       await authClient.signOut();
       setIsMenuOpen(false);
-    
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -49,33 +81,15 @@ const Navbar = () => {
 
           {/* ================= DESKTOP MENU ================= */}
           <div className="hidden items-center gap-8 md:flex">
-            <Link
-              href="/"
-              className="font-medium transition hover:text-blue-600"
-            >
-              Home
-            </Link>
-
-            <Link
-              href="/jobs"
-              className="font-medium transition hover:text-blue-600"
-            >
-              Browse Jobs
-            </Link>
-
-            <Link
-              href="/companies"
-              className="font-medium transition hover:text-blue-600"
-            >
-              Companies
-            </Link>
-
-            <Link
-              href="/plans"
-              className="font-medium transition hover:text-blue-600"
-            >
-              Pricing
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="font-medium transition hover:text-blue-600"
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
 
           {/* ================= RIGHT SIDE ================= */}
@@ -110,8 +124,12 @@ const Navbar = () => {
                   className="flex h-auto items-center gap-3 px-2 py-1"
                 >
                   <Avatar>
-                    <Avatar.Image alt="John Doe" src={user?.image} />
-                    <Avatar.Fallback>{user.name[0]}</Avatar.Fallback>
+                    <Avatar.Image
+                      alt={user?.name || "User"}
+                      src={user?.image}
+                    />
+
+                    <Avatar.Fallback>{user?.name?.[0] || "U"}</Avatar.Fallback>
                   </Avatar>
 
                   <div className="flex flex-col items-start">
@@ -133,19 +151,19 @@ const Navbar = () => {
                       textValue="My Applications"
                     >
                       <Link href="/applications" className="block w-full">
-                        <Label>Browse Jobs</Label>
+                        <Label>My Applications</Label>
                       </Link>
                     </Dropdown.Item>
 
                     <Dropdown.Item id="profile" textValue="Profile">
                       <Link href="/profile" className="block w-full">
-                        <Label>Company</Label>
+                        <Label>Profile</Label>
                       </Link>
                     </Dropdown.Item>
 
                     <Dropdown.Item id="saved-jobs" textValue="Saved Jobs">
                       <Link href="/saved-jobs" className="block w-full">
-                        <Label>Pricing</Label>
+                        <Label>Saved Jobs</Label>
                       </Link>
                     </Dropdown.Item>
 
@@ -179,13 +197,15 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="border-t border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900 md:hidden">
           <div className="mx-auto max-w-7xl px-4 py-4">
-            {/* User Info */}
+            {/* ================= USER INFO ================= */}
             {user && (
               <div className="mb-3 flex items-center gap-3 rounded-xl bg-gray-50 p-3 dark:bg-slate-800">
                 <Avatar>
-                  <Avatar.Image alt="John Doe" src={user?.image} />
-                  <Avatar.Fallback>JD</Avatar.Fallback>
+                  <Avatar.Image alt={user?.name || "User"} src={user?.image} />
+
+                  <Avatar.Fallback>{user?.name?.[0] || "U"}</Avatar.Fallback>
                 </Avatar>
+
                 <div className="min-w-0">
                   <p className="font-semibold">{user?.name}</p>
 
@@ -196,44 +216,22 @@ const Navbar = () => {
               </div>
             )}
 
-            {/* Navigation */}
+            {/* ================= NAVIGATION ================= */}
             <div className="flex flex-col">
-              <Link
-                href="/"
-                onClick={() => setIsMenuOpen(false)}
-                className="rounded-lg px-4 py-3 font-medium hover:bg-gray-100 dark:hover:bg-slate-800"
-              >
-                Home
-              </Link>
-
-              <Link
-                href="/jobs"
-                onClick={() => setIsMenuOpen(false)}
-                className="rounded-lg px-4 py-3 font-medium hover:bg-gray-100 dark:hover:bg-slate-800"
-              >
-                Browse Jobs
-              </Link>
-
-              <Link
-                href="/company"
-                onClick={() => setIsMenuOpen(false)}
-                className="rounded-lg px-4 py-3 font-medium hover:bg-gray-100 dark:hover:bg-slate-800"
-              >
-                Company
-              </Link>
-
-              <Link
-                href="/pricing"
-                onClick={() => setIsMenuOpen(false)}
-                className="rounded-lg px-4 py-3 font-medium hover:bg-gray-100 dark:hover:bg-slate-800"
-              >
-                Pricing
-              </Link>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="rounded-lg px-4 py-3 font-medium hover:bg-gray-100 dark:hover:bg-slate-800"
+                >
+                  {link.name}
+                </Link>
+              ))}
 
               <div className="my-3 h-px bg-gray-200 dark:bg-slate-700" />
 
               {/* ================= MOBILE AUTH ================= */}
-
               {!user ? (
                 <div className="flex flex-col gap-3">
                   <Link href="/signin" onClick={() => setIsMenuOpen(false)}>

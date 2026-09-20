@@ -12,12 +12,15 @@ import { getPlanById } from "@/lib/api/plans";
 const ApplyPage = async ({ params }) => {
   const { id } = await params;
 
+  // Get logged-in user
   const user = await getUserSession();
 
+  // If user is not logged in
   if (!user) {
     redirect(`/signin?redirect=/jobs/${id}/apply`);
   }
 
+  // Only seekers can apply
   if (user.role !== "seeker") {
     return (
       <div className="flex min-h-[500px] items-center justify-center bg-gray-50 px-4 dark:bg-gray-950">
@@ -46,25 +49,60 @@ const ApplyPage = async ({ params }) => {
     );
   }
 
+  // Get user's applications
   const application = await getApplicationByApplicant(user.id);
-  const plan=await getPlanById(user?.plan||'seeker_free');
-  console.log("checking Number",plan);
 
- 
+  // Get user's plan
+  const plan = await getPlanById(user.plan || "seeker_free");
 
+  // Get job
   const job = await getJobById(id);
 
-  const applicationLimitReached =
-    application.length >= plan.maxApplicationsPerMonth;
+  // Safety check
+  if (!plan) {
+    return (
+      <div className="flex min-h-[500px] items-center justify-center">
+        <div className="rounded-xl border border-danger-200 bg-danger-50 p-6 text-center">
+          <h2 className="text-xl font-bold text-danger-600">
+            Plan Not Found
+          </h2>
 
-  const progress = Math.min(
-    (application.length / plan.maxApplicationsPerMonth) * 100,
-    100
-  );
+          <p className="mt-2 text-sm text-gray-600">
+            Your subscription plan could not be found.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * Application count
+   *
+   * IMPORTANT:
+   * This currently counts all applications returned by
+   * getApplicationByApplicant().
+   *
+   * If your API already returns only current-month applications,
+   * this works directly.
+   */
+  const applicationCount = application.length;
+
+  const maxApplications = Number(plan.maxApplicationsPerMonth) || 0;
+
+  // Check limit
+  const applicationLimitReached =
+    maxApplications > 0 && applicationCount >= maxApplications;
+
+  // Calculate progress
+  const progress =
+    maxApplications > 0
+      ? Math.min((applicationCount / maxApplications) * 100, 100)
+      : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10 dark:bg-gray-950">
       <div className="mx-auto max-w-4xl">
+
         {/* Header */}
         <div className="mb-8">
           <p className="text-sm font-medium text-primary-600 dark:text-primary-400">
@@ -83,6 +121,7 @@ const ApplyPage = async ({ params }) => {
         {/* Application Limit Card */}
         <div className="mb-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
             {/* Usage Info */}
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -91,11 +130,11 @@ const ApplyPage = async ({ params }) => {
 
               <div className="mt-1 flex items-baseline gap-1">
                 <span className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {application.length}
+                  {applicationCount}
                 </span>
 
                 <span className="text-sm text-gray-400">
-                  / {plan.maxApplicationsPerMonth}
+                  / {maxApplications}
                 </span>
               </div>
 
@@ -108,7 +147,7 @@ const ApplyPage = async ({ params }) => {
             <div className="w-full sm:max-w-xs">
               <div className="mb-2 flex items-center justify-between text-xs">
                 <span className="font-semibold text-gray-700 dark:text-gray-300">
-                  Free Plan
+                  {plan.name}
                 </span>
 
                 <span className="font-semibold text-primary-600 dark:text-primary-400">
@@ -117,11 +156,14 @@ const ApplyPage = async ({ params }) => {
               </div>
 
               {/* Progress Background */}
-              <div className="h-2 w-full overflow-hidden rounded-full bg-red-700">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+
                 {/* Filled Progress */}
                 <div
                   className={`h-full rounded-full shadow-sm transition-all duration-700 ease-out ${
-                    applicationLimitReached ? "bg-danger-500" : "bg-primary-500"
+                    applicationLimitReached
+                      ? "bg-danger-500"
+                      : "bg-primary-500"
                   }`}
                   style={{
                     width: `${progress}%`,
@@ -130,7 +172,7 @@ const ApplyPage = async ({ params }) => {
               </div>
 
               <p className="mt-2 text-right text-xs text-gray-400">
-                {application.length} of {plan.maxApplicationsPerMonth} used
+                {applicationCount} of {maxApplications} used
               </p>
             </div>
           </div>
@@ -139,24 +181,28 @@ const ApplyPage = async ({ params }) => {
         {/* Limit Reached */}
         {applicationLimitReached ? (
           <div className="rounded-2xl border border-warning-200 bg-warning-50 p-8 text-center dark:border-warning-900/50 dark:bg-warning-950/30">
+
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-warning-100 text-2xl dark:bg-warning-900/40">
               🔒
             </div>
+
             <h2 className="text-xl font-bold text-warning-800 dark:text-warning-300">
               Monthly Application Limit Reached
             </h2>
+
             <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-warning-700 dark:text-warning-400">
-              You have used all {plan.maxApplicationsPerMonth} applications
-              available on the Free Plan this month.
+              You have used all {maxApplications} applications available on
+              the {plan.name} plan this month.
             </p>
 
             <Link
-              href="/plans"
-              className="group mt-6 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.12] hover:shadow-xl hover:shadow-black/40 active:translate-y-0"
+              href="/plan/viewplans"
+              className="group mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-xl active:translate-y-0"
             >
               Upgrade Your Plan
-              <span className="text-lg text-white/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white">
-                <ArrowRight/>
+
+              <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
+                <ArrowRight />
               </span>
             </Link>
           </div>
@@ -164,6 +210,7 @@ const ApplyPage = async ({ params }) => {
           <>
             {/* Upgrade Notice */}
             <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-primary-100 bg-primary-50 p-5 dark:border-primary-900/50 dark:bg-primary-950/30 sm:flex-row sm:items-center sm:justify-between">
+
               <div>
                 <h3 className="font-semibold text-primary-900 dark:text-primary-300">
                   Need more applications?

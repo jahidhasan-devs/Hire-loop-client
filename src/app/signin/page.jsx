@@ -17,6 +17,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
+    console.log("🔥 SIGNIN PAGE LOADED")
   const router = useRouter();
 
  const searchParams=useSearchParams();
