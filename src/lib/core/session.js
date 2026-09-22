@@ -15,7 +15,7 @@ return session?.user||null;
 }
 export const requireRole = async(role)=>{
     const user= await getUserSession()
-    console.log("check none user",user);
+    // console.log("check none user",user);
 
       if (!user) {
         redirect("/signin");

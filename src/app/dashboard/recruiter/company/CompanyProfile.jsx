@@ -437,7 +437,7 @@ function CompanyFormModal({ open, setOpen, company, recruiter, onSuccess }) {
         employeeCount: formData.employeeCount,
         description: formData.description,
         logo: logoUrl,
-        status: company?.status || "pending",
+        status: company && company.status?company.status :"pending",
 
         // IMPORTANT
         recruiterId: recruiter?.id,

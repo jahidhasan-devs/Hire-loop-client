@@ -7,6 +7,9 @@ export const createCompany=async (newCompanyData)=>{
     return serverMutation('/api/companies',newCompanyData)
 }
 
+ export const updateCompany=async(id,data )=>{
+ return serverMutation(`/api/companies/${id}`,data,"PATCH");
+ }
 
 // const baseUrl = process.env.NEXT_PUBLIC_BASE_URI;
 // export const createCompany=async(newCompanyData)=>{

@@ -33,10 +33,11 @@ const Navbar = () => {
     },
   ];
 
-  const dashboardLinks={
-    seeker:'/dashboard/seeker',
-    recruiter:'/dashboard/recruiter'
-  } 
+const dashboardLinks = {
+  seeker: "/dashboard/seeker",
+  recruiter: "/dashboard/recruiter",
+  admin: "/dashboard/admin",
+};
 
   if(user?.email){
     navLinks.push(
