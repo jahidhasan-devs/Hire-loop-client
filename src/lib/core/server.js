@@ -1,3 +1,5 @@
+
+import { redirect } from "next/navigation";
 import { getUserToken } from "./session";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URI;
@@ -13,7 +15,8 @@ export const authHeader=async()=>{
 
 export const serverFetch=async(path)=>{
 const res=await fetch(`${baseUrl}${path}`);
-//handle 401,404,403
+
+
 return res.json();
 }
 
@@ -22,7 +25,8 @@ export const protectedFetch = async (path) => {
     headers: await authHeader(),
   });
 
-  return res.json();
+ 
+return handleStatusCode(res);
 };
 
 export const serverMutation=async(path,data,method="POST")=>{
@@ -36,7 +40,19 @@ export const serverMutation=async(path,data,method="POST")=>{
 
 });
 
-// handle 401 ,404 ,403
 
-return res.json();
+return handleStatusCode(res);
 };
+
+// handle 401 ,404 ,403
+// handle 401, 404, 403
+const handleStatusCode = res => {
+    if (res.status === 401) {
+        redirect('/unauthorized')
+    }
+    else if (res.status === 403) {
+        redirect('/forbidden');
+    }
+
+    return res.json()
+}

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Table, Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { updateCompany } from "@/lib/actions/companies"; // আপনার পাথ অনুযায়ী ঠিক করে নিন
+import { updateCompany } from "@/lib/actions/companies";
 
 function getInitials(name = "") {
   return name
@@ -16,6 +16,7 @@ function getInitials(name = "") {
 
 function formatDate(dateString) {
   if (!dateString) return "Oct 12, 2023";
+
   return new Date(dateString).toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
@@ -30,7 +31,11 @@ export default function CompaniesTable({ companies = [] }) {
   const handleAction = async (companyId, action) => {
     try {
       setLoadingId(companyId);
-      await updateCompany(String(companyId), { status: action });
+
+      await updateCompany(String(companyId), {
+        status: action,
+      });
+
       router.refresh();
     } catch (error) {
       console.error("Error updating status:", error);
@@ -51,7 +56,8 @@ export default function CompaniesTable({ companies = [] }) {
         <Table.ScrollContainer>
           <Table.Content>
             <Table.Header>
-              <Table.Column>Company Name</Table.Column>
+              <Table.Column isRowHeader>Company Name</Table.Column>
+
               <Table.Column>Recruiter Email</Table.Column>
               <Table.Column>Industry</Table.Column>
               <Table.Column>Jobs count</Table.Column>
@@ -59,10 +65,15 @@ export default function CompaniesTable({ companies = [] }) {
               <Table.Column>Date Submitted</Table.Column>
               <Table.Column>Actions</Table.Column>
             </Table.Header>
+
             <Table.Body>
               {companies.map((company) => {
                 const status = (company.status || "pending").toLowerCase();
-                const fallbackEmail = `hr@${(company.companyName || "company").toLowerCase().replace(/\s+/g, "")}.com`;
+
+                const fallbackEmail = `hr@${(company.companyName || "company")
+                  .toLowerCase()
+                  .replace(/\s+/g, "")}.com`;
+
                 const isProcessing = loadingId === String(company._id);
 
                 return (
@@ -73,7 +84,7 @@ export default function CompaniesTable({ companies = [] }) {
                           {company.logo ? (
                             <img
                               src={company.logo}
-                              alt={company.companyName}
+                              alt={company.companyName || "Company logo"}
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -82,6 +93,7 @@ export default function CompaniesTable({ companies = [] }) {
                             </span>
                           )}
                         </div>
+
                         <span className="font-medium text-zinc-100">
                           {company.companyName}
                         </span>
@@ -117,6 +129,7 @@ export default function CompaniesTable({ companies = [] }) {
                                 : "bg-amber-400"
                           }`}
                         />
+
                         <span
                           className={`text-xs font-medium capitalize ${
                             status === "approved"
@@ -151,6 +164,7 @@ export default function CompaniesTable({ companies = [] }) {
                             {isProcessing ? "..." : "Approve"}
                           </Button>
                         )}
+
                         {status !== "rejected" && (
                           <Button
                             size="sm"
@@ -171,24 +185,33 @@ export default function CompaniesTable({ companies = [] }) {
             </Table.Body>
           </Table.Content>
         </Table.ScrollContainer>
+
         <Table.Footer>
           <div className="flex items-center justify-between px-2 py-3 text-xs text-zinc-400">
             <div>
               Showing 1-{companies.length} of {companies.length} companies
             </div>
+
             <div className="flex items-center gap-1">
-              <button className="px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700 disabled:opacity-50">
+              <button
+                className="px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700 disabled:opacity-50"
+                disabled
+              >
                 &lt;
               </button>
+
               <button className="px-2.5 py-1 rounded bg-zinc-100 text-zinc-950 font-semibold">
                 1
               </button>
+
               <button className="px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
                 2
               </button>
+
               <button className="px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
                 3
               </button>
+
               <button className="px-2.5 py-1 rounded bg-zinc-800 text-zinc-300 hover:bg-zinc-700">
                 &gt;
               </button>
