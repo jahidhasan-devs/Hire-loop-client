@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+
 import { Button, InputGroup, Label, TextField } from "@heroui/react";
 
 import {
@@ -14,22 +15,19 @@ import {
 } from "@gravity-ui/icons";
 
 import { authClient } from "@/lib/auth-client";
+
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SignInPage() {
-    console.log("🔥 SIGNIN PAGE LOADED")
+function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
- const searchParams=useSearchParams();
- const redirectTo=searchParams.get('redirect')|| "/";
- console.log("Redirect to",redirectTo)
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
@@ -48,7 +46,6 @@ export default function SignInPage() {
       const res = await authClient.signIn.email({
         email,
         password,
-        
       });
 
       if (res?.error) {
@@ -57,10 +54,9 @@ export default function SignInPage() {
       }
 
       setSuccessMsg("Login successful! Redirecting...");
-       router.push(redirectTo);
-   
-    } 
-    catch (err) {
+
+      router.push(redirectTo);
+    } catch (err) {
       setErrorMsg(err?.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
@@ -179,5 +175,13 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInForm />
+    </Suspense>
   );
 }

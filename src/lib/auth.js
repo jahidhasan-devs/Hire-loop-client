@@ -4,34 +4,34 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { admin } from "better-auth/plugins";
 
 const client = new MongoClient(process.env.MONGO_DB_URI);
+
 const db = client.db(process.env.BETTER_AUTH_DB);
 
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
-    // Optional: if you don't provide a client, database transactions won't be enabled.
     client,
   }),
+
   emailAndPassword: {
     enabled: true,
   },
 
-user:{
-  additionalFields:{
-    role:{
-      default:"seeker"
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://hire-loop-client-a4zwyrrdw-jahidsharuar2021-progs-projects.vercel.app",
+  ],
+
+  user: {
+    additionalFields: {
+      role: {
+        default: "seeker",
+      },
+
+      plan: {
+        default: "seeker_free",
+      },
     },
-    plan:{
-      default:'seeker_free'
-    }
-  }
-},
+  },
 
-plugins:[
-  admin()
-]
-
-
-
-
-
+  plugins: [admin()],
 });

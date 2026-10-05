@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+
 import { Description, Radio, RadioGroup } from "@heroui/react";
 import { Button, InputGroup, Label, TextField } from "@heroui/react";
 
@@ -18,21 +19,19 @@ import {
 
 import { authClient } from "@/lib/auth-client";
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const searchparams=useSearchParams();
-  const redirectTo=searchparams.get("redirect")||"/";
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const [name, setName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role,setRole]=useState("seeker");
-
+  const [role, setRole] = useState("seeker");
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
@@ -47,7 +46,7 @@ export default function SignUpPage() {
     setSuccessMsg(null);
     setLoading(true);
 
-      const plan=role==='seeker'?'seeker_free':'recruiter_free';
+    const plan = role === "seeker" ? "seeker_free" : "recruiter_free";
 
     try {
       const res = await authClient.signUp.email({
@@ -57,7 +56,6 @@ export default function SignUpPage() {
         role,
         plan,
         image: imageUrl || undefined,
-       
       });
 
       if (res?.error) {
@@ -95,6 +93,7 @@ export default function SignUpPage() {
         {successMsg && (
           <div className="mb-4 flex items-center gap-2 rounded-xl border border-success-200 bg-success-50 p-3 text-small text-success">
             <CircleCheck className="h-5 w-5 shrink-0" />
+
             <span>{successMsg}</span>
           </div>
         )}
@@ -103,6 +102,7 @@ export default function SignUpPage() {
         {errorMsg && (
           <div className="mb-4 flex items-center gap-2 rounded-xl border border-danger-200 bg-danger-50 p-3 text-small text-danger">
             <TriangleExclamation className="h-5 w-5 shrink-0" />
+
             <span>{errorMsg}</span>
           </div>
         )}
@@ -205,6 +205,7 @@ export default function SignUpPage() {
           {/* Role selection */}
           <div className="flex flex-col gap-4">
             <Label>Subscription plan</Label>
+
             <RadioGroup
               defaultValue="seeker"
               name="role"
@@ -218,8 +219,10 @@ export default function SignUpPage() {
                   </Radio.Control>
                   Job Seeker
                 </Radio.Content>
+
                 <Description>For job search</Description>
               </Radio>
+
               <Radio value="recruiter">
                 <Radio.Content>
                   <Radio.Control>
@@ -227,6 +230,7 @@ export default function SignUpPage() {
                   </Radio.Control>
                   Recruiter
                 </Radio.Content>
+
                 <Description>Recruiter</Description>
               </Radio>
             </RadioGroup>
@@ -256,5 +260,13 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
   );
 }

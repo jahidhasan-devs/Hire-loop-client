@@ -1,5 +1,6 @@
 import { getJobs } from "@/lib/api/jobs";
 import JobsContent from "@/components/jobs/JobsContent";
+import { Suspense } from "react";
 
 const JobsPage = async () => {
   const jobs = await getJobs();
@@ -12,7 +13,9 @@ const JobsPage = async () => {
         Discover your next engineering challenge
       </p>
 
-      <JobsContent jobs={jobs} />
+      <Suspense fallback={<div>Loading jobs...</div>}>
+        <JobsContent jobs={jobs} />
+      </Suspense>
     </div>
   );
 };

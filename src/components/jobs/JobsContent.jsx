@@ -19,7 +19,6 @@ const JobsContent = ({ jobs }) => {
   const category = searchParams.get("category") || "all";
   const type = searchParams.get("type") || "all";
   const remote = searchParams.get("remote") || "all";
-
   const pageFromUrl = Number(searchParams.get("page")) || 1;
 
   const [page, setPage] = useState(pageFromUrl);
@@ -42,50 +41,23 @@ const JobsContent = ({ jobs }) => {
         job.location?.city?.toLowerCase().includes(searchText) ||
         job.location?.country?.toLowerCase().includes(searchText);
 
-      const matchesCategory =
-        category === "all" || job.category === category;
+      const matchesCategory = category === "all" || job.category === category;
 
-      const matchesType =
-        type === "all" || job.type === type;
+      const matchesType = type === "all" || job.type === type;
 
       const matchesRemote =
         remote === "all" ||
         (remote === "remote" && job.location?.remote === true) ||
         (remote === "onsite" && job.location?.remote === false);
 
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesType &&
-        matchesRemote
-      );
+      return matchesSearch && matchesCategory && matchesType && matchesRemote;
     });
   }, [jobs, search, category, type, remote]);
 
   // Total pages
   const totalItems = filteredJobs.length;
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(totalItems / ITEMS_PER_PAGE)
-  );
-
-  // Keep page valid
-  useEffect(() => {
-    if (page > totalPages) {
-      updateUrl({
-        page: totalPages,
-      });
-    }
-  }, [page, totalPages]);
-
-  // Current page jobs
-  const paginatedJobs = useMemo(() => {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-
-    return filteredJobs.slice(startIndex, endIndex);
-  }, [filteredJobs, page]);
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
 
   // Update URL
   const updateUrl = useCallback(
@@ -120,23 +92,31 @@ const JobsContent = ({ jobs }) => {
 
       const queryString = params.toString();
 
-      const newUrl = queryString
-        ? `${pathname}?${queryString}`
-        : pathname;
+      const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
 
       router.push(newUrl, {
         scroll: false,
       });
     },
-    [
-      pathname,
-      router,
-      search,
-      category,
-      type,
-      remote,
-    ]
+    [pathname, router, search, category, type, remote],
   );
+
+  // Keep page valid
+  useEffect(() => {
+    if (page > totalPages) {
+      updateUrl({
+        page: totalPages,
+      });
+    }
+  }, [page, totalPages, updateUrl]);
+
+  // Current page jobs
+  const paginatedJobs = useMemo(() => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+
+    return filteredJobs.slice(startIndex, endIndex);
+  }, [filteredJobs, page]);
 
   // Receive filters from JobSearchFilter
   const handleFilter = useCallback(
@@ -149,7 +129,7 @@ const JobsContent = ({ jobs }) => {
         page: 1,
       });
     },
-    [updateUrl]
+    [updateUrl],
   );
 
   // Change page
@@ -201,15 +181,9 @@ const JobsContent = ({ jobs }) => {
   };
 
   // Result summary
-  const startItem =
-    totalItems === 0
-      ? 0
-      : (page - 1) * ITEMS_PER_PAGE + 1;
+  const startItem = totalItems === 0 ? 0 : (page - 1) * ITEMS_PER_PAGE + 1;
 
-  const endItem = Math.min(
-    page * ITEMS_PER_PAGE,
-    totalItems
-  );
+  const endItem = Math.min(page * ITEMS_PER_PAGE, totalItems);
 
   return (
     <>
@@ -228,10 +202,7 @@ const JobsContent = ({ jobs }) => {
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {paginatedJobs.map((job) => (
-              <JobCard
-                key={job._id}
-                job={job}
-              />
+              <JobCard key={job._id} job={job} />
             ))}
           </div>
 
@@ -239,17 +210,14 @@ const JobsContent = ({ jobs }) => {
             <div className="mt-10">
               <Pagination className="w-full">
                 <Pagination.Summary>
-                  Showing {startItem}-{endItem} of{" "}
-                  {totalItems} results
+                  Showing {startItem}-{endItem} of {totalItems} results
                 </Pagination.Summary>
 
                 <Pagination.Content>
                   <Pagination.Item>
                     <Pagination.Previous
                       isDisabled={page === 1}
-                      onPress={() =>
-                        handlePageChange(page - 1)
-                      }
+                      onPress={() => handlePageChange(page - 1)}
                     >
                       <Pagination.PreviousIcon />
                       <span>Previous</span>
@@ -265,22 +233,18 @@ const JobsContent = ({ jobs }) => {
                       <Pagination.Item key={p}>
                         <Pagination.Link
                           isActive={p === page}
-                          onPress={() =>
-                            handlePageChange(p)
-                          }
+                          onPress={() => handlePageChange(p)}
                         >
                           {p}
                         </Pagination.Link>
                       </Pagination.Item>
-                    )
+                    ),
                   )}
 
                   <Pagination.Item>
                     <Pagination.Next
                       isDisabled={page === totalPages}
-                      onPress={() =>
-                        handlePageChange(page + 1)
-                      }
+                      onPress={() => handlePageChange(page + 1)}
                     >
                       <span>Next</span>
                       <Pagination.NextIcon />
@@ -293,9 +257,7 @@ const JobsContent = ({ jobs }) => {
         </>
       ) : (
         <div className="rounded-2xl border border-white/10 bg-[#171719] py-16 text-center">
-          <h3 className="text-xl font-medium text-white">
-            No jobs found
-          </h3>
+          <h3 className="text-xl font-medium text-white">No jobs found</h3>
 
           <p className="mt-2 text-sm text-white/40">
             Try changing your search or filter options.
