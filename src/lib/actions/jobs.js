@@ -1,23 +1,19 @@
-"use server";
+import { serverFetch } from "../core/server";
 
-import { serverMutation } from "../core/server";
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URI;
 
-export const createJob=async (newJobData)=>{
-  return serverMutation('/api/jobs',newJobData)
-}
+export const getJobs = async () => {
+  return serverFetch("/api/jobs");
+};
 
+export const getJobById = async (jobId) => {
+  return serverFetch(`/api/jobs/${jobId}`);
+};
 
+export const getCompanyJobs = async (companyId, status = "active") => {
+  const res = await fetch(
+    `${baseUrl}/api/jobs?companyId=${companyId}&status=${status}`,
+  );
 
-// const baseUrl = process.env.NEXT_PUBLIC_BASE_URI;
-// console.log(baseUrl);
-
-// export const createJob = async (newJobData) => {
-//   const res = await fetch(`${baseUrl}/api/jobs`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//     body: JSON.stringify(newJobData),
-//   });
-//   return res.json();
-// };
+  return res.json();
+};

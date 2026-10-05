@@ -75,16 +75,7 @@ const ApplyPage = async ({ params }) => {
     );
   }
 
-  /*
-   * Application count
-   *
-   * IMPORTANT:
-   * This currently counts all applications returned by
-   * getApplicationByApplicant().
-   *
-   * If your API already returns only current-month applications,
-   * this works directly.
-   */
+ 
   const applicationCount = application.length;
 
   const maxApplications = Number(plan.maxApplicationsPerMonth) || 0;
@@ -196,7 +187,7 @@ const ApplyPage = async ({ params }) => {
             </p>
 
             <Link
-              href="/plan/viewplans"
+              href="/plans"
               className="group mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-xl active:translate-y-0"
             >
               Upgrade Your Plan
@@ -222,7 +213,7 @@ const ApplyPage = async ({ params }) => {
               </div>
 
               <Link
-                href="/plan/viewplans"
+                href="/plans"
                 className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-700"
               >
                 View Plans

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+
 import {
   Select,
   Label,
@@ -10,52 +11,42 @@ import {
   Button,
 } from "@heroui/react";
 
-const JobSearchFilter = ({ jobs, onFilter }) => {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [type, setType] = useState("all");
-  const [remote, setRemote] = useState("all");
+const JobSearchFilter = ({ jobs, onFilter, initialValues }) => {
+  const [search, setSearch] = useState(initialValues?.search || "");
 
-  // Get unique categories
+  const [category, setCategory] = useState(initialValues?.category || "all");
+
+  const [type, setType] = useState(initialValues?.type || "all");
+
+  const [remote, setRemote] = useState(initialValues?.remote || "all");
+
+  // Sync filter state with URL
+  useEffect(() => {
+    setSearch(initialValues?.search || "");
+    setCategory(initialValues?.category || "all");
+    setType(initialValues?.type || "all");
+    setRemote(initialValues?.remote || "all");
+  }, [initialValues]);
+
+  // Unique categories
   const categories = useMemo(() => {
     return [...new Set(jobs.map((job) => job.category).filter(Boolean))];
   }, [jobs]);
 
-  // Get unique job types
+  // Unique job types
   const jobTypes = useMemo(() => {
     return [...new Set(jobs.map((job) => job.type).filter(Boolean))];
   }, [jobs]);
 
-  // Filter jobs
-  const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const searchText = search.toLowerCase().trim();
-
-      const matchesSearch =
-        !searchText ||
-        job.title?.toLowerCase().includes(searchText) ||
-        job.company?.name?.toLowerCase().includes(searchText) ||
-        job.category?.toLowerCase().includes(searchText) ||
-        job.location?.city?.toLowerCase().includes(searchText) ||
-        job.location?.country?.toLowerCase().includes(searchText);
-
-      const matchesCategory = category === "all" || job.category === category;
-
-      const matchesType = type === "all" || job.type === type;
-
-      const matchesRemote =
-        remote === "all" ||
-        (remote === "remote" && job.location?.remote === true) ||
-        (remote === "onsite" && job.location?.remote === false);
-
-      return matchesSearch && matchesCategory && matchesType && matchesRemote;
-    });
-  }, [jobs, search, category, type, remote]);
-
-  // Send filtered jobs to parent
+  // Send filter values to parent
   useEffect(() => {
-    onFilter(filteredJobs);
-  }, [filteredJobs, onFilter]);
+    onFilter({
+      search,
+      category,
+      type,
+      remote,
+    });
+  }, [search, category, type, remote, onFilter]);
 
   // Clear filters
   const clearFilters = () => {
@@ -196,14 +187,10 @@ const JobSearchFilter = ({ jobs, onFilter }) => {
         </Button>
       </div>
 
-      {/* Result count */}
+      {/* Result info */}
       <div className="mt-4 border-t border-white/10 pt-3">
         <p className="text-xs text-white/40">
-          Showing{" "}
-          <span className="font-medium text-white/70">
-            {filteredJobs.length}
-          </span>{" "}
-          {filteredJobs.length === 1 ? "job" : "jobs"}
+          Search and filter jobs using the options above.
         </p>
       </div>
     </div>
